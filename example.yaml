@@ -1,0 +1,94 @@
+esphome:
+  name: aquael-ultramax
+  on_boot:
+    priority: -100
+    then:
+      - delay: 500ms
+      - switch.turn_on: ultramax_bt_conn
+
+esp32:
+  variant: esp32s3          # or board: esp32dev
+  framework:
+    type: esp-idf
+
+api:
+  encryption:
+    key: !secret api_key
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+logger:
+
+time:
+  - platform: homeassistant
+    id: ha_time
+
+esp32_ble_tracker:
+  scan_parameters:
+    active: true
+
+ble_client:
+  - mac_address: "AA:BB:CC:DD:EE:FF"   # your filter's MAC
+    id: ultramax_client
+    auto_connect: false
+
+external_components:
+  - source: github://JakubFialkowski/esphome-aquael-ultramax@v0.1.0
+    components: [aquael_ultramax]
+
+switch:
+  - platform: template
+    name: "Ultramax BT Connection"
+    id: ultramax_bt_conn
+    restore_mode: RESTORE_DEFAULT_ON
+    optimistic: true
+    turn_on_action:
+      - ble_client.connect: ultramax_client
+    turn_off_action:
+      - ble_client.disconnect: ultramax_client
+
+aquael_ultramax:
+  id: ultramax
+  ble_client_id: ultramax_client
+  time_id: ha_time
+  flow_percent_day:
+    name: "Ultramax Day Flow"
+  mode:
+    name: "Ultramax Mode (read)"
+  device_clock:
+    name: "Ultramax Device Clock"
+  filtration:
+    name: "Ultramax Filtration (read)"
+  mode_select:
+    name: "Ultramax Mode"
+  filtration_switch:
+    name: "Ultramax Filtration"
+  day_night:
+    name: "Ultramax Day/Night"
+  day_high:
+    name: "Ultramax Day High"
+  day_low:
+    name: "Ultramax Day Low"
+  night_high:
+    name: "Ultramax Night High"
+  night_low:
+    name: "Ultramax Night Low"
+  sunrise:
+    name: "Ultramax Sunrise"
+  sunset:
+    name: "Ultramax Sunset"
+  status:
+    name: "Ultramax Status"
+  pump_fault:
+    name: "Ultramax Pump Fault"
+  feeding:
+    name: "Ultramax Feeding"
+  wave_period:
+    name: "Ultramax Wave Period"
+  refresh:
+    name: "Ultramax Refresh"
